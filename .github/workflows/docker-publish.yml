@@ -102,4 +102,4 @@ jobs:
           user: lordmrcs
           keep: 4
           names: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ env.IMAGE_NAME }}
