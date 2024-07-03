@@ -5,6 +5,8 @@ RUN apt-get update && \
     apt-get install -y \
     libpq-dev \
     wget \
+    curl \
+    jq \
     unzip \
     libldap-dev && \
     docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
@@ -17,13 +19,16 @@ RUN apt-get update && \
 ENV MW_EXT_DIR=/var/www/html/extensions
 
 # Download and install PluggableAuth extension
-RUN wget -qO- https://extdist.wmflabs.org/dist/extensions/PluggableAuth-REL1_42-f0a83a8.tar.gz | tar -xz -C $MW_EXT_DIR
+RUN latest_tag=$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-PluggableAuth/tags | jq -r '.[0].name') && \
+    wget -qO- https://github.com/wikimedia/mediawiki-extensions-PluggableAuth/archive/refs/tags/${latest_tag}.zip | tar -xz -C $MW_EXT_DIR
 
 # Download and install LDAPProvider extension
-RUN wget -qO- https://github.com/wikimedia/mediawiki-extensions-LDAPProvider/archive/refs/tags/`$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-LDAPProvider/tags | jq -r '.[0].name')`.zip | tar -xz -C $MW_EXT_DIR
+RUN latest_tag=$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-LDAPProvider/tags | jq -r '.[0].name') && \
+    wget -qO- https://github.com/wikimedia/mediawiki-extensions-LDAPProvider/archive/refs/tags/${latest_tag}.zip | tar -xz -C $MW_EXT_DIR
 
 # Download and install LDAPAuthentication2 extension
-RUN wget -qO- https://extdist.wmflabs.org/dist/extensions/LDAPAuthentication2-REL1_42-dbd16a5.tar.gz | tar -xz -C $MW_EXT_DIR
+RUN latest_tag=$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-LDAPAuthentication2/tags | jq -r '.[0].name') && \
+    wget -qO- https://github.com/wikimedia/mediawiki-extensions-LDAPAuthentication2/archive/refs/tags/${latest_tag}.zip | tar -xz -C $MW_EXT_DIR
 
 # Ensure ownership and permissions are correct
 RUN chown -R www-data:www-data $MW_EXT_DIR
