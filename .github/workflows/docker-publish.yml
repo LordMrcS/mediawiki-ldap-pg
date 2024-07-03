@@ -8,10 +8,10 @@ name: Docker
 on:
   push:
     branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+  - cron: "0 2 15 * *"
   workflow_dispatch:
 
 env:
@@ -94,3 +94,12 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      - name: Delete old packages
+        uses: smartsquaregmbh/delete-old-packages@v0.8.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          type: docker
+          keep: 4
+          names: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
