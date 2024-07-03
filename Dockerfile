@@ -25,14 +25,6 @@ RUN wget -qO- https://extdist.wmflabs.org/dist/extensions/LDAPProvider-REL1_42-e
 # Download and install LDAPAuthentication2 extension
 RUN wget -qO- https://extdist.wmflabs.org/dist/extensions/LDAPAuthentication2-REL1_42-dbd16a5.tar.gz | tar -xz -C $MW_EXT_DIR
 
-RUN mkdir /data
-
-# Adding LocalSettings.php
-ADD LocalSettings.php /data/LocalSettings.php 
-
-# Symbolic link /data/LocalSettings.php to /var/www/html
-RUN ln -s /data/LocalSettings.php /var/www/html
-
 # Ensure ownership and permissions are correct
 RUN chown -R www-data:www-data $MW_EXT_DIR
 
