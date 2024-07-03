@@ -94,12 +94,11 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
-      
-
 
       - name: Delete old packages
         uses: actions/delete-package-versions@v5
         with: 
           package-name: 'mediawiki-ldap-pg'
           package-type: 'container'
+          min-versions-to-keep: 4
           delete-only-untagged-versions: 'true'
