@@ -29,7 +29,7 @@ RUN wget -qO- https://extdist.wmflabs.org/dist/extensions/LDAPAuthentication2-RE
 ADD LocalSettings.php /data
 
 # Symbolic link /data/LocalSettings.php to /var/www/html
-RUN ln -P /data/LocalSettings.php /var/www/html
+RUN ln -s /data/LocalSettings.php /var/www/html
 
 # Ensure ownership and permissions are correct
 RUN chown -R www-data:www-data $MW_EXT_DIR
