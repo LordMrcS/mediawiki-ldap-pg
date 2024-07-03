@@ -98,8 +98,8 @@ jobs:
       - name: Delete old packages
         uses: smartsquaregmbh/delete-old-packages@v0.8.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           type: docker
+          user: lordmrcs
           keep: 4
           names: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
