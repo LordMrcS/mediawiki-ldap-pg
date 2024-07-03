@@ -98,7 +98,7 @@ jobs:
       - name: Delete old packages
         uses: smartsquaregmbh/delete-old-packages@v0.8.0
         with:
-          type: docker
+          type: container
           user: lordmrcs
           keep: 4
           names: |
