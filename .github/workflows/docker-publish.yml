@@ -102,4 +102,4 @@ jobs:
           user: lordmrcs
           keep: 4
           names: |
-            ${{ env.IMAGE_NAME }}
+            mediawiki-ldap-pg
