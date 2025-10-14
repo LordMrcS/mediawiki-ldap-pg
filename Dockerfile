@@ -78,7 +78,6 @@ RUN chown -R www-data:www-data $MW_EXT_DIR
 
 # Expose the HTTP port
 EXPOSE 80
-EXPOSE 443
 
 # Command to run Apache
 CMD ["apache2-foreground"]
