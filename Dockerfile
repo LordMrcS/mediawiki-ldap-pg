@@ -1,45 +1,50 @@
-FROM mediawiki:latest
+FROM mediawiki:1.44
+ENV VERSION=REL1_44
 
 # Install PHP PostgreSQL support and other necessary packages
 RUN apt-get update && \
-    apt-get install -y \
-    libpq-dev \
-    wget \
+    apt-get install -y --no-install-recommends \
     curl \
-    jq \
     unzip \
-    libldap-dev && \
-    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
-    docker-php-ext-install \
-    pdo_pgsql pgsql ldap && \
-    apt-get purge -y --auto-remove libldap-dev && \
+    libpq-dev \
+    libzip-dev \
+    libonig-dev \
+    wget \
+    libicu-dev && \
+# Instala as extensões PHP que o MediaWiki e os plugins precisam.
+    docker-php-ext-install zip mbstring intl pdo_pgsql pgsql && \
+#   apt-get purge -y --auto-remove libldap-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Set MediaWiki extensions directory
 ENV MW_EXT_DIR=/var/www/html/extensions
 
+# 3. Define o diretório de trabalho para a pasta de extensões
+WORKDIR /var/www/html/extensions
+
 # Download and install PluggableAuth extension
-RUN PluggableAuth=$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-PluggableAuth/tags | jq -r '.[0].name') && \
-    wget -qO /tmp/PluggableAuth.zip https://github.com/wikimedia/mediawiki-extensions-PluggableAuth/archive/refs/tags/${PluggableAuth}.zip && \
+RUN wget -qO /tmp/PluggableAuth.zip https://github.com/wikimedia/mediawiki-extensions-PluggableAuth/archive/refs/heads/${VERSION}.zip && \
     unzip /tmp/PluggableAuth.zip -d $MW_EXT_DIR && \
-    mv $MW_EXT_DIR/mediawiki-extensions-PluggableAuth-${PluggableAuth} $MW_EXT_DIR/PluggableAuth && \
+    mv $MW_EXT_DIR/mediawiki-extensions-PluggableAuth-${VERSION} $MW_EXT_DIR/PluggableAuth && \
     rm -f /tmp/PluggableAuth.zip
 
-# Download and install LDAPProvider extension
-RUN LDAPProvider=$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-LDAPProvider/tags | jq -r '.[0].name') && \
-    wget -qO /tmp/LDAPProvider.zip https://github.com/wikimedia/mediawiki-extensions-LDAPProvider/archive/refs/tags/${LDAPProvider}.zip && \
-    unzip /tmp/LDAPProvider.zip -d $MW_EXT_DIR && \
-    mv $MW_EXT_DIR/mediawiki-extensions-LDAPProvider-${LDAPProvider} $MW_EXT_DIR/LDAPProvider && \
-    rm -f /tmp/LDAPProvider.zip
+RUN wget -qO /tmp/OpenIDConnect.zip https://github.com/wikimedia/mediawiki-extensions-OpenIDConnect/archive/refs/heads/${VERSION}.zip && \
+    unzip /tmp/OpenIDConnect.zip -d $MW_EXT_DIR && \
+    mv $MW_EXT_DIR/mediawiki-extensions-OpenIDConnect-${VERSION} $MW_EXT_DIR/OpenIDConnect && \
+    rm -f /tmp/OpenIDConnect.zip
 
-# Download and install LDAPAuthentication2 extension
-RUN LDAPAuthentication2=$(curl -s https://api.github.com/repos/wikimedia/mediawiki-extensions-LDAPAuthentication2/tags | jq -r '.[0].name') && \
-    wget -qO /tmp/LDAPAuthentication2.zip https://github.com/wikimedia/mediawiki-extensions-LDAPAuthentication2/archive/refs/tags/${LDAPAuthentication2}.zip && \
-    unzip /tmp/LDAPAuthentication2.zip -d $MW_EXT_DIR && \
-    mv $MW_EXT_DIR/mediawiki-extensions-LDAPAuthentication2-${LDAPAuthentication2} $MW_EXT_DIR/LDAPAuthentication2 && \
-    rm -f /tmp/LDAPAuthentication2.zip
+# Remove a versão do ParserFunctions instalada pelo Composer para evitar conflito
+RUN rm -rf ParserFunctions
 
-# Ensure ownership and permissions are correct
+RUN wget -qO /tmp/ParserFunctions.zip https://github.com/wikimedia/mediawiki-extensions-ParserFunctions/archive/refs/heads/${VERSION}.zip && \
+    unzip /tmp/ParserFunctions.zip -d $MW_EXT_DIR && \
+    mv $MW_EXT_DIR/mediawiki-extensions-ParserFunctions-${VERSION} $MW_EXT_DIR/ParserFunctions && \
+    rm -f /tmp/ParserFunctions.zip
+
+# Volta para o diretório principal
+WORKDIR /var/www/html
+
+#Ensure ownership and permissions are correct
 RUN chown -R www-data:www-data $MW_EXT_DIR
 
 # Expose the HTTP port
